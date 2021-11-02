@@ -354,7 +354,7 @@ public interface RedisService{
      * @param value 值
      * @return 移除的个数
      */
-    long lRemove(String key, long count, Object value);
+    Long lRemove(String key, long count, Object value);
 
     /**
      * 从redis集合中移除[start,end]之间的元素
@@ -366,10 +366,11 @@ public interface RedisService{
      */
     void rangeRemove(String key, Long stard, Long end);
 
-    /**
-     * 返回当前redisTemplate
-     *
-     * @return
-     */
-    RedisTemplate getRedisTemplate();
+
+
+    void setBit(String key, int offset, boolean value);
+
+    Boolean getBit(String key, int offset);
+
+    Long bitCount(String key);
 }

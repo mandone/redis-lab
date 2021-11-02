@@ -1,9 +1,13 @@
 package com.mandone.redis.basic;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -64,11 +68,7 @@ public class RedisServiceImpl implements RedisService{
     public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
-//
-//    @Override
-//    public Object get(String key) {
-//        return templateService.get(key);
-//    }
+
 
     @Override
     public boolean set(String key, Object value) {
@@ -400,13 +400,12 @@ public class RedisServiceImpl implements RedisService{
     }
 
     @Override
-    public long lRemove(String key, long count, Object value) {
+    public Long lRemove(String key, long count, Object value) {
         try {
-            Long remove = redisTemplate.opsForList().remove(key, count, value);
-            return remove;
+            return redisTemplate.opsForList().remove(key, count, value);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0;
+            return 0L;
         }
     }
 
@@ -420,8 +419,23 @@ public class RedisServiceImpl implements RedisService{
     }
 
     @Override
-    public RedisTemplate getRedisTemplate() {
-        return this.redisTemplate;
+    public void setBit(String key, int offset, boolean value){
+        redisTemplate.opsForValue().setBit(key,offset,value);
+    }
+
+    @Override
+    public Boolean getBit(String key, int offset){
+        return redisTemplate.opsForValue().getBit(key,offset);
+    }
+
+    @Override
+    public Long bitCount(String key){
+        return redisTemplate.execute(new RedisCallback<Long>() {
+            @Override
+            public Long doInRedis(RedisConnection connection) throws DataAccessException {
+                return connection.bitCount(key.getBytes(StandardCharsets.UTF_8));
+            }
+        });
     }
 
 }
