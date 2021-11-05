@@ -1,10 +1,12 @@
 package com.mandone.redis.core;
 
+import org.springframework.data.geo.Distance;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface RedisService{
+public interface RedisService {
     /**
      * 指定缓存失效时间
      *
@@ -55,6 +57,7 @@ public interface RedisService{
 
     /**
      * 多值保存，可用于博客信息上传
+     *
      * @param value: 内容以map形式保存
      * @return 保存结果
      */
@@ -62,6 +65,7 @@ public interface RedisService{
 
     /**
      * 多值保存，可用于博客信息上传
+     *
      * @param value: 内容以map形式保存
      * @return 保存结果
      */
@@ -69,6 +73,7 @@ public interface RedisService{
 
     /**
      * 多值读取
+     *
      * @param keys:key集合
      * @return value集合
      */
@@ -93,6 +98,7 @@ public interface RedisService{
     /**
      * 递增
      * 可用于社交点赞数
+     *
      * @param key   键
      * @param delta 增值
      * @return 次数总数
@@ -102,6 +108,7 @@ public interface RedisService{
     /**
      * 递减
      * 可用于社交点赞数
+     *
      * @param key   键
      * @param delta 要减少几(小于0)
      * @return 次数总数
@@ -391,8 +398,6 @@ public interface RedisService{
      */
     void rangeRemove(String key, Long stard, Long end);
 
-
-
     void setBit(String key, long offset, boolean value);
 
     Boolean getBit(String key, long offset);
@@ -412,4 +417,8 @@ public interface RedisService{
     String lPop(String key);
 
     String rPop(String key);
+
+    Long geoAdd(String key, Double longitude, Double latitude, String member);
+
+    Distance geoDist(String key, String member1, String member2);
 }

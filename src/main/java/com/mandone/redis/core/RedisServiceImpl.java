@@ -2,6 +2,8 @@ package com.mandone.redis.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -186,7 +188,6 @@ public class RedisServiceImpl implements RedisService {
     public Map<Object, Object> hmget(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
-
 
 
     @Override
@@ -501,30 +502,30 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Long hincr(String bucket, String key, long delta) {
-        return redisTemplate.opsForHash().increment(bucket,key,delta);
+        return redisTemplate.opsForHash().increment(bucket, key, delta);
     }
 
     @Override
     public Boolean hexists(String key, String value) {
         return redisTemplate.execute((RedisCallback<Boolean>) connection ->
-                connection.hExists(key.getBytes(StandardCharsets.UTF_8),value.getBytes(StandardCharsets.UTF_8)));
+                connection.hExists(key.getBytes(StandardCharsets.UTF_8), value.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
     public Map<String, String> hgetAll(String key) {
         return redisTemplate.opsForHash().entries(key)
                 .entrySet().stream().collect(
-                        Collectors.toMap(k -> (String) (k.getKey()), v -> (String)(v.getValue())));
+                        Collectors.toMap(k -> (String) (k.getKey()), v -> (String) (v.getValue())));
     }
 
     @Override
     public void lPush(String key, String value) {
-        redisTemplate.opsForList().leftPush(key,value);
+        redisTemplate.opsForList().leftPush(key, value);
     }
 
     @Override
     public void rPush(String key, String value) {
-        redisTemplate.opsForList().rightPush(key,value);
+        redisTemplate.opsForList().rightPush(key, value);
     }
 
     @Override
@@ -535,5 +536,15 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public String rPop(String key) {
         return String.valueOf((redisTemplate.opsForList().rightPop(key)));
+    }
+
+    @Override
+    public Long geoAdd(String key, Double longitude, Double latitude, String member) {
+        return redisTemplate.opsForGeo().add(key, new Point(longitude, latitude), member);
+    }
+
+    @Override
+    public Distance geoDist(String key, String member1, String member2) {
+        return redisTemplate.opsForGeo().distance(key, member1, member2);
     }
 }

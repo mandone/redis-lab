@@ -2,6 +2,7 @@ package com.mandone.redis;
 
 import com.mandone.redis.core.RedisService;
 import com.mandone.redis.demo.advanced.bit.AccessLog;
+import com.mandone.redis.demo.advanced.geohash.DistanceCalculate;
 import com.mandone.redis.demo.hash.BlogView;
 import com.mandone.redis.demo.hash.UrlMapping;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -10,6 +11,9 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,43 +30,43 @@ public class RedisTest {
     private BlogView blogDemo;
 
     @Test
-    public void get(){
+    public void get() {
         Object aaa = redisService.get("Hello");
         System.out.println(aaa);
     }
 
     @Test
-    public void set(){
-        Object aaa = redisService.set("Hello","Mandone");
+    public void set() {
+        Object aaa = redisService.set("Hello", "Mandone");
         System.out.println(aaa);
     }
 
     @Test
-    public void setBit(){
-        redisService.setBit("bit",1,true);
-        redisService.setBit("bit",2,true);
-        redisService.setBit("bit",4,true);
-        redisService.setBit("bit",8,true);
+    public void setBit() {
+        redisService.setBit("bit", 1, true);
+        redisService.setBit("bit", 2, true);
+        redisService.setBit("bit", 4, true);
+        redisService.setBit("bit", 8, true);
     }
 
     @Test
-    public void getBit(){
+    public void getBit() {
         Boolean bit = redisService.getBit("bit", 1);
         System.out.println(bit);
     }
 
     @Test
-    public void bitCount(){
+    public void bitCount() {
         Long bit = redisService.bitCount("bit");
         System.out.println(bit);
     }
 
     @Test
-    public void urlTest(){
+    public void urlTest() {
         String url = "http://redis.com/index.html";
         String shortUrl = urlMappingDemo.getShortUrl(url);
         System.out.println("页面上展示的短链接地址为：" + shortUrl);
-        for(long i = 0L; i < 152; i++) {
+        for (long i = 0L; i < 152; i++) {
             urlMappingDemo.incrementShortUrlAccessCount(shortUrl);
         }
         long accessCount = urlMappingDemo.getShortUrlAccessCount(shortUrl);
@@ -71,7 +75,7 @@ public class RedisTest {
 
 
     @Test
-    public void blogTest(){
+    public void blogTest() {
         // 发表一篇博客
         long id = blogDemo.getBlogId();
         Map<String, String> blog = new HashMap<String, String>();
@@ -98,8 +102,9 @@ public class RedisTest {
 
     @Autowired
     private AccessLog accessLog;
+
     @Test
-    public void accessLogTest(){
+    public void accessLogTest() {
         String today = new DateTime().toString("yyyy-MM-dd");
         for (int number = 0; number < 10; number++) {
             String s = RandomStringUtils.randomNumeric(4, 5);
@@ -107,5 +112,16 @@ public class RedisTest {
             accessLog.addRequest(uniqueId);
         }
         System.out.println(today + "日访问量:" + accessLog.getAccessCount());
+    }
+
+    @Autowired
+    private DistanceCalculate distanceCalculate;
+
+
+    @Test
+    public void geoTest() {
+        distanceCalculate.savePosition("天安门", 116.396822,39.908789);
+        distanceCalculate.savePosition("平安大厦", 114.109981,22.542288);
+        System.out.println(distanceCalculate.getDistance("天安门", "平安大厦"));
     }
 }
