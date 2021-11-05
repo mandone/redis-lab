@@ -1,4 +1,4 @@
-package com.mandone.redis.basic;
+package com.mandone.redis.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

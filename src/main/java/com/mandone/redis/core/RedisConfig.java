@@ -1,4 +1,4 @@
-package com.mandone.redis.basic;
+package com.mandone.redis.core;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -66,7 +66,7 @@ public class RedisConfig {
         template.setHashKeySerializer(stringRedisSerializer);
         Jackson2JsonRedisSerializer<Object> redisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         template.setValueSerializer(redisSerializer);
-        template.setHashValueSerializer(redisSerializer);
+        template.setHashValueSerializer(stringRedisSerializer);
         template.afterPropertiesSet();
         return template;
     }

@@ -1,6 +1,4 @@
-package com.mandone.redis.basic;
-
-import org.springframework.data.redis.core.RedisTemplate;
+package com.mandone.redis.core;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,7 @@ public interface RedisService{
      * @param key 键 不能为null
      * @return 时间(秒) 返回0代表为永久有效
      */
-    long getExpire(String key);
+    Long getExpire(String key);
 
     /**
      * 判断key是否存在
@@ -28,7 +26,7 @@ public interface RedisService{
      * @param key 键
      * @return true 存在 false不存在
      */
-    boolean hasKey(String key);
+    Boolean hasKey(String key);
 
     /**
      * 删除缓存
@@ -56,6 +54,27 @@ public interface RedisService{
     boolean set(String key, Object value);
 
     /**
+     * 多值保存，可用于博客信息上传
+     * @param value: 内容以map形式保存
+     * @return 保存结果
+     */
+    boolean mset(Map<String, Object> value);
+
+    /**
+     * 多值保存，可用于博客信息上传
+     * @param value: 内容以map形式保存
+     * @return 保存结果
+     */
+    boolean multiSetIfAbsent(Map<String, Object> value);
+
+    /**
+     * 多值读取
+     * @param keys:key集合
+     * @return value集合
+     */
+    List<?> mget(Set<String> keys);
+
+    /**
      * 普通缓存放入并设置时间
      *
      * @param key   键
@@ -65,23 +84,29 @@ public interface RedisService{
      */
     boolean set(String key, Object value, long time);
 
+    Integer append(String key, String value);
+
+    Long getLength(String key);
+
+    String getRange(String key, long start, long end);
+
     /**
      * 递增
-     *
+     * 可用于社交点赞数
      * @param key   键
-     * @param delta 要增加几(大于0)
-     * @return
+     * @param delta 增值
+     * @return 次数总数
      */
-    long incr(String key, long delta);
+    Long incr(String key, long delta);
 
     /**
      * 递减
-     *
+     * 可用于社交点赞数
      * @param key   键
      * @param delta 要减少几(小于0)
-     * @return
+     * @return 次数总数
      */
-    long decr(String key, long delta);
+    Long decr(String key, long delta);
 
     /**
      * HashGet
@@ -107,7 +132,7 @@ public interface RedisService{
      * @param map 对应多个键值
      * @return true 成功 false 失败
      */
-    boolean hmset(String key, Map<String, Object> map);
+    boolean hmset(String key, Map<?, ?> map);
 
     /**
      * HashSet 并设置时间
@@ -192,7 +217,7 @@ public interface RedisService{
      * @param value 值
      * @return true 存在 false不存在
      */
-    boolean sHasKey(String key, Object value);
+    Boolean sHasKey(String key, Object value);
 
     /**
      * 将数据放入set缓存
@@ -201,7 +226,7 @@ public interface RedisService{
      * @param values 值 可以是多个
      * @return 成功个数
      */
-    long sSet(String key, Object... values);
+    Long sSet(String key, Object... values);
 
     /**
      * 将set数据放入缓存
@@ -211,7 +236,7 @@ public interface RedisService{
      * @param values 值 可以是多个
      * @return 成功个数
      */
-    long sSetAndTime(String key, long time, Object... values);
+    Long sSetAndTime(String key, long time, Object... values);
 
 
     /**
@@ -220,7 +245,7 @@ public interface RedisService{
      * @param key 键
      * @return
      */
-    long sGetSetSize(String key);
+    Long sGetSetSize(String key);
 
     /**
      * 移除值为value的
@@ -229,7 +254,7 @@ public interface RedisService{
      * @param values 值 可以是多个
      * @return 移除的个数
      */
-    long setRemove(String key, Object... values);
+    Long setRemove(String key, Object... values);
 
     /**
      * 获取list缓存的内容
@@ -247,7 +272,7 @@ public interface RedisService{
      * @param key 键
      * @return
      */
-    long lGetListSize(String key);
+    Long lGetListSize(String key);
 
     /**
      * 通过索引 获取list中的值
@@ -368,9 +393,23 @@ public interface RedisService{
 
 
 
-    void setBit(String key, int offset, boolean value);
+    void setBit(String key, long offset, boolean value);
 
-    Boolean getBit(String key, int offset);
+    Boolean getBit(String key, long offset);
 
     Long bitCount(String key);
+
+    Long hincr(String bucket, String key, long delta);
+
+    Boolean hexists(String s, String title);
+
+    Map<String, String> hgetAll(String s);
+
+    void lPush(String key, String value);
+
+    void rPush(String key, String value);
+
+    String lPop(String key);
+
+    String rPop(String key);
 }

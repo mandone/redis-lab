@@ -1,21 +1,20 @@
-package com.mandone.redis.basic;
+package com.mandone.redis.core;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
-public class RedisServiceImpl implements RedisService{
+public class RedisServiceImpl implements RedisService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisServiceImpl.class);
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -32,22 +31,22 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
 
     @Override
-    public long getExpire(String key) {
+    public Long getExpire(String key) {
         return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     @Override
-    public boolean hasKey(String key) {
+    public Boolean hasKey(String key) {
         try {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method hasKey execute failed", e);
             return false;
         }
     }
@@ -63,6 +62,7 @@ public class RedisServiceImpl implements RedisService{
             }
         }
     }
+    //################################################String###########################################################//
 
     @Override
     public Object get(String key) {
@@ -76,9 +76,42 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForValue().set(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
+    }
+
+    @Override
+    public boolean mset(Map<String, Object> value) {
+        try {
+            redisTemplate.opsForValue().multiSet(value);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean multiSetIfAbsent(Map<String, Object> value) {
+        try {
+            redisTemplate.opsForValue().multiSetIfAbsent(value);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+            return false;
+        }
+    }
+
+
+    @Override
+    public List<?> mget(Set<String> keys) {
+        try {
+            return redisTemplate.opsForValue().multiGet(keys);
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -91,13 +124,44 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
 
     @Override
-    public long incr(String key, long delta) {
+    public Integer append(String key, String value) {
+        try {
+            return redisTemplate.opsForValue().append(key, value);
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+            return 0;
+        }
+    }
+
+    @Override
+    public Long getLength(String key) {
+        try {
+            return redisTemplate.execute((RedisCallback<Long>) connection -> connection.strLen(key.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
+        }
+    }
+
+    @Override
+    public String getRange(String key, long start, long end) {
+        try {
+            return redisTemplate.execute((RedisCallback<String>) connection -> new String(Objects.requireNonNull(connection.getRange(key.getBytes(StandardCharsets.UTF_8), start, end))));
+        } catch (Exception e) {
+            LOGGER.error("method expire execute failed", e);
+            return "";
+        }
+    }
+
+
+    @Override
+    public Long incr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递增因子必须大于0");
         }
@@ -105,12 +169,13 @@ public class RedisServiceImpl implements RedisService{
     }
 
     @Override
-    public long decr(String key, long delta) {
+    public Long decr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递减因子必须大于0");
         }
         return redisTemplate.opsForValue().increment(key, -delta);
     }
+
 
     @Override
     public Object hget(String key, String item) {
@@ -122,13 +187,15 @@ public class RedisServiceImpl implements RedisService{
         return redisTemplate.opsForHash().entries(key);
     }
 
+
+
     @Override
-    public boolean hmset(String key, Map<String, Object> map) {
+    public boolean hmset(String key, Map<?, ?> map) {
         try {
             redisTemplate.opsForHash().putAll(key, map);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -142,7 +209,7 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -153,7 +220,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForHash().put(key, item, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -167,7 +234,7 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -197,33 +264,33 @@ public class RedisServiceImpl implements RedisService{
         try {
             return redisTemplate.opsForSet().members(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return null;
         }
     }
 
     @Override
-    public boolean sHasKey(String key, Object value) {
+    public Boolean sHasKey(String key, Object value) {
         try {
             return redisTemplate.opsForSet().isMember(key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
 
     @Override
-    public long sSet(String key, Object... values) {
+    public Long sSet(String key, Object... values) {
         try {
             return redisTemplate.opsForSet().add(key, values);
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
         }
     }
 
     @Override
-    public long sSetAndTime(String key, long time, Object... values) {
+    public Long sSetAndTime(String key, long time, Object... values) {
         try {
             Long count = redisTemplate.opsForSet().add(key, values);
             if (time > 0) {
@@ -231,29 +298,28 @@ public class RedisServiceImpl implements RedisService{
             }
             return count;
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
         }
     }
 
     @Override
-    public long sGetSetSize(String key) {
+    public Long sGetSetSize(String key) {
         try {
             return redisTemplate.opsForSet().size(key);
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
         }
     }
 
     @Override
-    public long setRemove(String key, Object... values) {
+    public Long setRemove(String key, Object... values) {
         try {
-            Long count = redisTemplate.opsForSet().remove(key, values);
-            return count;
+            return redisTemplate.opsForSet().remove(key, values);
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
         }
     }
 
@@ -262,18 +328,18 @@ public class RedisServiceImpl implements RedisService{
         try {
             return redisTemplate.opsForList().range(key, start, end);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return null;
         }
     }
 
     @Override
-    public long lGetListSize(String key) {
+    public Long lGetListSize(String key) {
         try {
             return redisTemplate.opsForList().size(key);
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            LOGGER.error("method expire execute failed", e);
+            return 0L;
         }
     }
 
@@ -282,7 +348,7 @@ public class RedisServiceImpl implements RedisService{
         try {
             return redisTemplate.opsForList().index(key, index);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return null;
         }
     }
@@ -293,7 +359,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForList().leftPushAll(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -304,7 +370,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForList().leftPushIfPresent(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -318,7 +384,7 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
 
@@ -332,7 +398,7 @@ public class RedisServiceImpl implements RedisService{
                 expire(key, time);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -343,7 +409,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForList().rightPush(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -357,7 +423,7 @@ public class RedisServiceImpl implements RedisService{
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
 
@@ -369,7 +435,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForList().rightPushAll(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
 
@@ -383,7 +449,7 @@ public class RedisServiceImpl implements RedisService{
                 expire(key, time);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -394,7 +460,7 @@ public class RedisServiceImpl implements RedisService{
             redisTemplate.opsForList().set(key, index, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return false;
         }
     }
@@ -404,7 +470,7 @@ public class RedisServiceImpl implements RedisService{
         try {
             return redisTemplate.opsForList().remove(key, count, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
             return 0L;
         }
     }
@@ -414,28 +480,60 @@ public class RedisServiceImpl implements RedisService{
         try {
             redisTemplate.opsForList().trim(key, stard, end);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("method expire execute failed", e);
         }
     }
 
     @Override
-    public void setBit(String key, int offset, boolean value){
-        redisTemplate.opsForValue().setBit(key,offset,value);
+    public void setBit(String key, long offset, boolean value) {
+        redisTemplate.opsForValue().setBit(key, offset, value);
     }
 
     @Override
-    public Boolean getBit(String key, int offset){
-        return redisTemplate.opsForValue().getBit(key,offset);
+    public Boolean getBit(String key, long offset) {
+        return redisTemplate.opsForValue().getBit(key, offset);
     }
 
     @Override
-    public Long bitCount(String key){
-        return redisTemplate.execute(new RedisCallback<Long>() {
-            @Override
-            public Long doInRedis(RedisConnection connection) throws DataAccessException {
-                return connection.bitCount(key.getBytes(StandardCharsets.UTF_8));
-            }
-        });
+    public Long bitCount(String key) {
+        return redisTemplate.execute((RedisCallback<Long>) connection -> connection.bitCount(key.getBytes(StandardCharsets.UTF_8)));
     }
 
+    @Override
+    public Long hincr(String bucket, String key, long delta) {
+        return redisTemplate.opsForHash().increment(bucket,key,delta);
+    }
+
+    @Override
+    public Boolean hexists(String key, String value) {
+        return redisTemplate.execute((RedisCallback<Boolean>) connection ->
+                connection.hExists(key.getBytes(StandardCharsets.UTF_8),value.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Override
+    public Map<String, String> hgetAll(String key) {
+        return redisTemplate.opsForHash().entries(key)
+                .entrySet().stream().collect(
+                        Collectors.toMap(k -> (String) (k.getKey()), v -> (String)(v.getValue())));
+    }
+
+    @Override
+    public void lPush(String key, String value) {
+        redisTemplate.opsForList().leftPush(key,value);
+    }
+
+    @Override
+    public void rPush(String key, String value) {
+        redisTemplate.opsForList().rightPush(key,value);
+    }
+
+    @Override
+    public String lPop(String key) {
+        return String.valueOf(redisTemplate.opsForList().leftPop(key));
+    }
+
+    @Override
+    public String rPop(String key) {
+        return String.valueOf((redisTemplate.opsForList().rightPop(key)));
+    }
 }
