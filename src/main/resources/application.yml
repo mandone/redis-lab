@@ -9,4 +9,4 @@ spring:
                 max-wait: -1
                 max-idle: 8
                 min-idle: 0
-        password: ssAxy521!@#
+        password:
