@@ -1,13 +1,17 @@
 package com.mandone.redis.core;
 
+import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import reactor.util.annotation.NonNullApi;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -546,5 +550,12 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Distance geoDist(String key, String member1, String member2) {
         return redisTemplate.opsForGeo().distance(key, member1, member2);
+    }
+
+    @Override
+    public Boolean setNx(String key, String  value) {
+        redisTemplate.execute((RedisCallback<Object>)
+                connection -> connection.setNX(key.getBytes(StandardCharsets.UTF_8),value.getBytes(StandardCharsets.UTF_8)));
+        return false;
     }
 }

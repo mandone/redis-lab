@@ -2,22 +2,19 @@ package com.mandone.redis;
 
 import com.mandone.redis.core.RedisService;
 import com.mandone.redis.demo.advanced.bit.AccessLog;
+import com.mandone.redis.demo.advanced.expire.DistributeLock;
+import com.mandone.redis.demo.advanced.expire.RedissonLock;
 import com.mandone.redis.demo.advanced.geohash.DistanceCalculate;
 import com.mandone.redis.demo.hash.BlogView;
 import com.mandone.redis.demo.hash.UrlMapping;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.Point;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 @SpringBootTest
 public class RedisTest {
@@ -120,8 +117,31 @@ public class RedisTest {
 
     @Test
     public void geoTest() {
-        distanceCalculate.savePosition("天安门", 116.396822,39.908789);
-        distanceCalculate.savePosition("平安大厦", 114.109981,22.542288);
+        distanceCalculate.savePosition("天安门", 116.396822, 39.908789);
+        distanceCalculate.savePosition("平安大厦", 114.109981, 22.542288);
         System.out.println(distanceCalculate.getDistance("天安门", "平安大厦"));
     }
+
+
+    @Autowired
+    private DistributeLock distributeLock;
+
+    @Test
+    public void testRedLock1() {
+        System.out.println(distributeLock.lock("lock1", "lock_value", 100));
+    }
+
+    @Autowired
+    private RedissonLock redissonLock;
+
+    @Test
+    public void testTryLock1() {
+        redissonLock.tryLock("lock9");
+    }
+
+    @Test
+    public void testLock1() {
+        redissonLock.lock("lock999");
+    }
+
 }

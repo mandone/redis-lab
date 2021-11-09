@@ -421,4 +421,6 @@ public interface RedisService {
     Long geoAdd(String key, Double longitude, Double latitude, String member);
 
     Distance geoDist(String key, String member1, String member2);
+
+    Boolean setNx(String key, String value);
 }
