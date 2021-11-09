@@ -12,11 +12,13 @@ public class BloomFilterUtil {
     @Autowired
     private RedissonClient redissonClient;
 
-    public void add(String key,String value){
+    public void add(String key, Object value) {
         RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(key);
-        if(!bloomFilter.isExists()){
-            bloomFilter.tryInit(1000,0.01);
-            bloomFilter.add(value);
-        }
+        bloomFilter.tryInit(1000, 0.01);
+        bloomFilter.add(value);
+    }
+
+    public long count(String key) {
+        return redissonClient.getBloomFilter(key).count();
     }
 }

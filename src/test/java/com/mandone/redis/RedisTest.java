@@ -1,6 +1,7 @@
 package com.mandone.redis;
 
 import com.mandone.redis.core.RedisService;
+import com.mandone.redis.demo.advanced.bf.BloomFilterUtil;
 import com.mandone.redis.demo.advanced.bit.AccessLog;
 import com.mandone.redis.demo.advanced.expire.DistributeLock;
 import com.mandone.redis.demo.advanced.expire.RedissonLock;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,6 +144,22 @@ public class RedisTest {
     @Test
     public void testLock1() {
         redissonLock.lock("lock999");
+    }
+
+    @Autowired
+    private BloomFilterUtil bloomFilter;
+
+    @Test
+    public void testBloomFilter(){
+        long num = 500;
+        for(int i = 0;i < num;i ++){
+            bloomFilter.add("bloom_box33",i);
+        }
+        long bloomCount = bloomFilter.count("bloom_box33");
+        System.out.println("添加布隆过滤器数量:" + num);
+        System.out.println("添加到布隆过滤器成功数量:" + bloomCount);
+        System.out.println("误判率:" + new BigDecimal(Math.abs(num - bloomCount))
+                .divide(new BigDecimal(num),4,BigDecimal.ROUND_HALF_UP));
     }
 
 }
