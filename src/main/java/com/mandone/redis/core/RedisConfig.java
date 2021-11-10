@@ -19,13 +19,8 @@ public class RedisConfig {
 
     @Value("${spring.redis.host}")
     private String host;
-//    @Value("${spring.redis.database}")
-//    private Integer database;
     @Value("${spring.redis.port}")
     private Integer port;
-    @Value("${spring.redis.password}")
-    private String password;
-
 
     @Primary
     @Bean(name = "jedisPoolConfig")
@@ -41,9 +36,7 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory(JedisPoolConfig jedisPoolConfig) {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(host);
-//        redisStandaloneConfiguration.setDatabase(database);
         redisStandaloneConfiguration.setPort(port);
-        redisStandaloneConfiguration.setPassword(password);
         JedisClientConfiguration.JedisPoolingClientConfigurationBuilder jpcb = (JedisClientConfiguration.JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();
         jpcb.poolConfig(jedisPoolConfig);
         JedisClientConfiguration jedisClientConfiguration = jpcb.build();
@@ -54,7 +47,7 @@ public class RedisConfig {
      * 配置redisTemplate针对不同key和value场景下不同序列化的方式
      *
      * @param factory Redis连接工厂
-     * @return
+     * @return redisTemplate
      */
     @Primary
     @Bean(name = "redisTemplate")
