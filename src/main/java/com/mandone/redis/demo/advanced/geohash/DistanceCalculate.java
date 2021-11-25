@@ -4,13 +4,15 @@ import com.mandone.redis.core.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 /**
  * 举例计算,需要提供经纬度 geoadd,geodist
  */
 @Component
 public class DistanceCalculate {
 
-    @Autowired
+    @Resource(name = "redisServiceImpl")
     private RedisService redisService;
 
     public String getKey(){

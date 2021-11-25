@@ -3,16 +3,16 @@ package com.mandone.redis.demo.hash;
 import com.mandone.redis.core.RedisService;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 @Component
 public class UrlMapping {
 
-    private final RedisService redisService;
+    @Resource(name = "redisServiceImpl")
+    private  RedisService redisService;
 
     private static final String[] X36_ARRAY = "0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z".split(",");
 
-    public UrlMapping(RedisService redisService) {
-        this.redisService = redisService;
-    }
 
     /**
      * 获取短连接网址

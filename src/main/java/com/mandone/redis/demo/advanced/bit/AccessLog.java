@@ -2,8 +2,9 @@ package com.mandone.redis.demo.advanced.bit;
 
 import com.mandone.redis.core.RedisService;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * setbit,getbit,bitcount,对于大数据量的判重数据可以使用
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccessLog {
 
-    @Autowired
+    @Resource(name = "lettuceClusterServiceImpl")
     private RedisService redisService;
 
     private String getKey(){

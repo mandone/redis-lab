@@ -11,16 +11,23 @@ import com.mandone.redis.demo.hash.UrlMapping;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 public class RedisTest {
-    @Autowired
+    @Resource(name = "redisServiceImpl")
     private RedisService redisService;
     @Autowired
     private UrlMapping urlMappingDemo;
@@ -30,7 +37,7 @@ public class RedisTest {
 
     @Test
     public void get() {
-        Object aaa = redisService.get("Hello");
+        Object aaa = redisService.set("hello","mandone");
         System.out.println(aaa);
     }
 
@@ -160,6 +167,54 @@ public class RedisTest {
         System.out.println("添加到布隆过滤器成功数量:" + bloomCount);
         System.out.println("误判率:" + new BigDecimal(Math.abs(num - bloomCount))
                 .divide(new BigDecimal(num),4,BigDecimal.ROUND_HALF_UP));
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisTest.class);
+
+    @Test
+    public void testSentinel()  {
+        Config config = new Config();
+        config.useSentinelServers()
+                .setMasterName("mymaster")
+                //可以用"redis://"来启用SSL连接
+                .addSentinelAddress("redis://192.168.111.137:26379")
+                .addSentinelAddress("redis://192.168.111.137:26380")
+                .addSentinelAddress("redis://192.168.111.137:26381")
+                .setMasterConnectionMinimumIdleSize(10);
+        RedissonClient redisson = Redisson.create(config);
+
+
+        while (true){
+            try {
+                String key = RandomStringUtils.randomNumeric(5);
+                long keyLon = Long.parseLong(key);
+                redisson.getBitSet("bitset").set(keyLon,true);
+                TimeUnit.SECONDS.sleep(1);
+                System.out.println("key " + key + ",value " + true );
+            }catch (Exception e){
+                LOGGER.error("set failed",e);
+            }
+        }
+
+    }
+
+    @Test
+    public void testCluster() throws InterruptedException {
+        Config config = new Config();
+        config.useClusterServers()
+                .setScanInterval(2000) // 集群状态扫描间隔时间，单位是毫秒
+                //可以用"rediss://"来启用SSL连接
+                .addNodeAddress("redis://192.168.111.144:7000", "redis://192.168.111.144:7003")
+                .addNodeAddress("redis://192.168.111.144:7001", "redis://192.168.111.144:7004")
+                .addNodeAddress("redis://192.168.111.144:7002", "redis://192.168.111.144:7005");
+        RedissonClient redisson = Redisson.create(config);
+
+        String key = RandomStringUtils.randomNumeric(5);
+        long keyLon = Long.parseLong(key);
+        redisson.getBitSet("bitset").set(keyLon,true);
+        TimeUnit.SECONDS.sleep(1);
+        System.out.println("key " + key + ",value " + true );
+
     }
 
 }

@@ -6,10 +6,12 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 @Component
 public class BloomFilterUtil {
 
-    @Autowired
+    @Resource(name = "redissionClient")
     private RedissonClient redissonClient;
 
     public void add(String key, Object value) {

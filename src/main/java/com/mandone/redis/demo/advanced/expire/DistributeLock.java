@@ -1,8 +1,9 @@
 package com.mandone.redis.demo.advanced.expire;
 
 import com.mandone.redis.core.RedisService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * 分布式锁
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DistributeLock {
 
-    @Autowired
+    @Resource(name = "lettuceClusterServiceImpl")
     private RedisService redisService;
 
     /**

@@ -3,16 +3,13 @@ package com.mandone.redis.demo.list;
 import com.mandone.redis.core.RedisService;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 @Component
 public class SecKillQueue {
 
-    private final RedisService redisService;
-
-
-    public SecKillQueue(RedisService redisService) {
-        this.redisService = redisService;
-    }
-
+    @Resource(name = "lettuceClusterServiceImpl")
+    private  RedisService redisService;
 
     public void saveRequest(String request){
         String queueName = "secKillQueue";
